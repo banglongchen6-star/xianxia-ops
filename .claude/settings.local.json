@@ -14,7 +14,10 @@
       "Bash(node /Users/Admin/线下运营/node_modules/next/dist/bin/next build)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(node /Users/Admin/线下运营/node_modules/next/dist/bin/next dev --port 3001)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/auth/login)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

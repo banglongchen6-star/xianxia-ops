@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes)",
+      "Read(//Users/Admin/**)",
+      "Bash(npx create-next-app@latest offline-ops --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes)",
+      "Bash(cp -r /Users/Admin/offline-ops/. /Users/Admin/线下运营/)",
+      "Bash(rm -rf /Users/Admin/offline-ops)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node /Users/Admin/线下运营/node_modules/typescript/lib/tsc.js --noEmit)",
+      "Bash(npm run *)",
+      "Bash(node /Users/Admin/线下运营/node_modules/next/dist/bin/next build)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

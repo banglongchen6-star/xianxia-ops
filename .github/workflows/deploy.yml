@@ -1,0 +1,24 @@
+name: Deploy to Alibaba Cloud
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 15m
+          script: |
+            cd /root/xianxia-ops
+            git pull origin main
+            npm install
+            npm run build
+            pm2 restart xianxia-ops
+            echo "✅ Deploy done"

@@ -4,7 +4,8 @@ import { Session } from "./types";
 export type View =
   | "home" | "projects" | "project-detail"
   | "partners" | "partner-detail" | "myprofile" | "messages"
-  | "products" | "samples" | "files";
+  | "products" | "samples" | "files"
+  | "orders" | "contracts";
 
 export interface Ctx {
   session: Session;

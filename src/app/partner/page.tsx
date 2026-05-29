@@ -1,19 +1,21 @@
 "use client";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
-  LayoutDashboard, FolderKanban, User, Bell, Box, FolderOpen,
+  FolderKanban, User, Bell, Box, FolderOpen, Package, ShoppingCart, FileText,
   LogOut, Music, Phone, ChevronRight, AlertCircle, UserPlus,
 } from "lucide-react";
 import { partnerStore, messageStore, seedDemo } from "@/lib/ops/store";
 import { inp, Field, RegionSelect } from "@/components/ops/ui";
 import { Session } from "@/lib/ops/types";
 import { View, Ctx } from "@/lib/ops/ctx";
-import HomeView from "@/components/ops/HomeView";
 import { MyProfileView } from "@/components/ops/ProfileViews";
 import { ProjectsView, ProjectDetailView } from "@/components/ops/ProjectViews";
 import MessagesView from "@/components/ops/MessagesView";
 import SamplesView from "@/components/ops/SamplesView";
 import FilesView from "@/components/ops/FilesView";
+import ProductsView from "@/components/ops/ProductsView";
+import PartnerOrdersView from "@/components/ops/PartnerOrdersView";
+import PartnerContractsView from "@/components/ops/PartnerContractsView";
 
 const PARTNER_SESSION_KEY = "ops_partner_pid";
 
@@ -205,10 +207,10 @@ function RegisterForm({ onDone, onGoLogin }: { onDone: (id: string) => void; onG
 // ════════════════════════════════════════════════════════════════════════
 // 主应用
 // ════════════════════════════════════════════════════════════════════════
-type PartnerView = "home" | "projects" | "project-detail" | "myprofile" | "samples" | "files" | "messages";
+type PartnerView = "projects" | "project-detail" | "myprofile" | "samples" | "products" | "orders" | "contracts" | "files" | "messages";
 
 function PartnerApp({ partnerId, onLogout }: { partnerId: string; onLogout: () => void }) {
-  const [view, setView] = useState<PartnerView>("home");
+  const [view, setView] = useState<PartnerView>("myprofile");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
 
@@ -232,16 +234,19 @@ function PartnerApp({ partnerId, onLogout }: { partnerId: string; onLogout: () =
   const ctx: Ctx = { session, refresh, go, selectedId };
 
   const nav: { id: PartnerView; label: string; icon: any; badge?: number }[] = [
-    { id: "home", label: "首页", icon: LayoutDashboard },
-    { id: "projects", label: "我的项目", icon: FolderKanban },
-    { id: "myprofile", label: "我的档案", icon: User },
-    { id: "samples", label: "样品物料", icon: Box },
-    { id: "files", label: "文件中心", icon: FolderOpen },
-    { id: "messages", label: "消息", icon: Bell, badge: unread },
+    { id: "myprofile",  label: "用户档案", icon: User },
+    { id: "projects",   label: "项目中心", icon: FolderKanban },
+    { id: "samples",    label: "样品管理", icon: Box },
+    { id: "products",   label: "产品&提成", icon: Package },
+    { id: "orders",     label: "订单",     icon: ShoppingCart },
+    { id: "contracts",  label: "合同",     icon: FileText },
+    { id: "files",      label: "文件中心", icon: FolderOpen },
+    { id: "messages",   label: "消息",     icon: Bell, badge: unread },
   ];
 
   const isActive = (id: PartnerView) =>
     view === id || (id === "projects" && view === "project-detail");
+
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -294,13 +299,15 @@ function PartnerApp({ partnerId, onLogout }: { partnerId: string; onLogout: () =
 
         {/* Content */}
         <main className="flex-1 overflow-auto">
-          {view === "home" && <HomeView ctx={ctx} />}
-          {view === "projects" && <ProjectsView ctx={ctx} />}
+          {view === "myprofile"  && <MyProfileView ctx={ctx} />}
+          {view === "projects"   && <ProjectsView ctx={ctx} />}
           {view === "project-detail" && <ProjectDetailView ctx={ctx} />}
-          {view === "myprofile" && <MyProfileView ctx={ctx} />}
-          {view === "samples" && <SamplesView ctx={ctx} />}
-          {view === "files" && <FilesView ctx={ctx} />}
-          {view === "messages" && <MessagesView ctx={ctx} />}
+          {view === "samples"    && <SamplesView ctx={ctx} />}
+          {view === "products"   && <ProductsView ctx={ctx} />}
+          {view === "orders"     && <PartnerOrdersView ctx={ctx} />}
+          {view === "contracts"  && <PartnerContractsView ctx={ctx} />}
+          {view === "files"      && <FilesView ctx={ctx} />}
+          {view === "messages"   && <MessagesView ctx={ctx} />}
         </main>
       </div>
     </div>

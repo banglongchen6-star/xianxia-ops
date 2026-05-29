@@ -113,10 +113,11 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
   const canPartnerEdit = !isCompany && p.status === "草稿";
 
   // 哪些 tab 可见
-  const showOrders = ["执行中", "待结算", "已结算"].includes(p.status);
-  const showSettlement = isCompany && ["待结算", "已结算", "执行中"].includes(p.status);
-  const showContract = ["执行中", "待结算", "已结算"].includes(p.status);
-  const showMaterials = ["执行中", "待结算", "已结算"].includes(p.status);
+  const active = ["执行中", "待结算", "已结算"].includes(p.status);
+  const showOrders    = isCompany && active;
+  const showContract  = isCompany && active;
+  const showMaterials = active;
+  const showSettlement = isCompany && active;
 
   const tabs: { id: DetailTab; label: string; icon: any }[] = [
     { id: "info", label: "基本信息", icon: MapPin },

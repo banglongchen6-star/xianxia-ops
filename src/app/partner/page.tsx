@@ -243,7 +243,6 @@ function PartnerApp({ partnerId, onLogout }: { partnerId: string; onLogout: () =
 
   const nav: { id: PartnerView; label: string; icon: any; badge?: number }[] = [
     { id: "projects",   label: "活动中心", icon: FolderKanban },
-    { id: "samples",    label: "样品物料", icon: Box },
     { id: "products",   label: "产品&提成", icon: Package },
     { id: "orders",     label: "订单&结算", icon: ShoppingCart },
     { id: "contracts",  label: "合同&签订", icon: FileText },

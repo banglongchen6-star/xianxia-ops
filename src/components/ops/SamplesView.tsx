@@ -4,7 +4,7 @@ import { Ctx } from "@/lib/ops/ctx";
 import { sampleStore, materialStore, partnerStore } from "@/lib/ops/store";
 import { Sample, SampleStatus, Material } from "@/lib/ops/types";
 import { inp, Field, Btn, Modal, EmptyState } from "./ui";
-import { Plus, Pencil, Trash2, Package2, Boxes } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const SAMPLE_STATUS_COLOR: Record<SampleStatus, string> = {
   在库: "bg-green-100 text-green-700",
@@ -12,31 +12,16 @@ const SAMPLE_STATUS_COLOR: Record<SampleStatus, string> = {
   已归还: "bg-gray-100 text-gray-500",
 };
 
-type SubTab = "samples" | "materials";
-
 // ════════════════════════════════════════════════════════════════════════
 // 样品物料（顶层页面）
 // ════════════════════════════════════════════════════════════════════════
 export default function SamplesView({ ctx }: { ctx: Ctx }) {
   const isCompany = ctx.session.role === "company";
-  const [tab, setTab] = useState<SubTab>("samples");
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">样品物料</h2>
-
-      {/* 子标签 */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit mb-6">
-        {([["samples", "样品库", Package2], ["materials", "物料主库", Boxes]] as const).map(([id, label, Icon]) => (
-          <button key={id} onClick={() => setTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === id ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-            <Icon size={15} />{label}
-          </button>
-        ))}
-      </div>
-
-      {tab === "samples" && <SamplesTab isCompany={isCompany} ctx={ctx} />}
-      {tab === "materials" && <MaterialsTab isCompany={isCompany} />}
+    <div className="p-6 space-y-10">
+      <SamplesTab isCompany={isCompany} ctx={ctx} />
+      <MaterialsTab isCompany={isCompany} />
     </div>
   );
 }
@@ -57,6 +42,7 @@ function SamplesTab({ isCompany, ctx }: { isCompany: boolean; ctx: Ctx }) {
 
   return (
     <div>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">样品库</h2>
       <div className="flex items-center justify-between mb-4">
         <div className="flex gap-2">
           {(["全部", "在库", "已发出", "已归还"] as const).map(s => (
@@ -237,6 +223,7 @@ function MaterialsTab({ isCompany }: { isCompany: boolean }) {
 
   return (
     <div>
+      <h2 className="text-lg font-semibold text-gray-900 mb-1">物料主库</h2>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-gray-500">物料主库是所有活动物料清单的来源，在项目详情中可从此处选择添加。</p>
         {isCompany && (

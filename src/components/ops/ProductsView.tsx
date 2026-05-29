@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Ctx } from "@/app/ops/page";
+import { Ctx } from "@/lib/ops/ctx";
 import { productStore } from "@/lib/ops/store";
 import { Product, CommissionType } from "@/lib/ops/types";
 import { inp, Field, Btn, Modal, EmptyState } from "./ui";

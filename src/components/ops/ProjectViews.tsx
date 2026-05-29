@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState, useRef } from "react";
-import { Ctx } from "@/app/ops/page";
+import { Ctx } from "@/lib/ops/ctx";
 import { projectStore, partnerStore, messageStore, compressImage } from "@/lib/ops/store";
 import { Project, ProjectStatus, MediaItem, PROJECT_STATUSES } from "@/lib/ops/types";
 import { inp, Field, Btn, Modal, RegionSelect, StatusBadge, EmptyState } from "./ui";

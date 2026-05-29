@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { Ctx } from "@/app/ops/page";
+import { Ctx } from "@/lib/ops/ctx";
 import { messageStore } from "@/lib/ops/store";
 import { EmptyState } from "./ui";
 import { Bell } from "lucide-react";

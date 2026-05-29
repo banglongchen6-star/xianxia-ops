@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Ctx } from "@/app/ops/page";
+import { Ctx } from "@/lib/ops/ctx";
 import { partnerStore, projectStore } from "@/lib/ops/store";
 import { inp, Field, Btn, RegionSelect, StatusBadge, EmptyState } from "./ui";
 import { ArrowLeft, ChevronRight, Phone, MessageCircle, MapPin, CheckCircle2, AlertCircle } from "lucide-react";

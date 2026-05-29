@@ -16,17 +16,8 @@ import SamplesView from "@/components/ops/SamplesView";
 import FilesView from "@/components/ops/FilesView";
 import RegisterPartnerModal from "@/components/ops/RegisterPartnerModal";
 
-export type View =
-  | "home" | "projects" | "project-detail"
-  | "partners" | "partner-detail" | "myprofile" | "messages"
-  | "products" | "samples" | "files";
-
-export interface Ctx {
-  session: Session;
-  refresh: () => void;
-  go: (view: View, id?: string) => void;
-  selectedId: string | null;
-}
+export type { View, Ctx } from "@/lib/ops/ctx";
+import type { View, Ctx } from "@/lib/ops/ctx";
 
 export default function OpsApp() {
   const { session, setSession, refresh, version, ready } = useOps();

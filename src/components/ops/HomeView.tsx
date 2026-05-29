@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { Ctx } from "@/app/ops/page";
+import { Ctx } from "@/lib/ops/ctx";
 import { projectStore, partnerStore, messageStore } from "@/lib/ops/store";
 import { StatusBadge } from "./ui";
 import { ClipboardCheck, Wallet, FolderKanban, Bell } from "lucide-react";

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useMemo } from "react";
-import { Ctx } from "@/app/ops/page";
+import { Ctx } from "@/lib/ops/ctx";
 import { resourceCategoryStore, resourceFileStore, fileToDataUrl } from "@/lib/ops/store";
 import { ResourceFile, ResourceCategory } from "@/lib/ops/types";
 import { inp, Field, Btn, Modal, EmptyState } from "./ui";

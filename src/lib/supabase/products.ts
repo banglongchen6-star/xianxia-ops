@@ -1,18 +1,21 @@
 import { createClient } from "./client";
 
+// 实际存数据库的素材类型
 export type MaterialType =
   | "image"
-  | "selling_point"
-  | "demo_video"
-  | "kol_video"
-  | "brand_video";
+  | "selling_image"   // 卖点图片
+  | "selling_video"   // 主播讲解视频
+  | "demo_video"      // 产品功能讲解小视频
+  | "promo";          // 宣发素材（压缩包）
 
-export const MATERIAL_TABS: { id: MaterialType; label: string }[] = [
-  { id: "image",         label: "图片素材" },
-  { id: "selling_point", label: "卖点讲解" },
-  { id: "demo_video",    label: "视频展示" },
-  { id: "kol_video",     label: "达人宣发" },
-  { id: "brand_video",   label: "品宣视频" },
+// UI tab ID（selling_point 是虚拟 tab，内含 selling_image + selling_video）
+export type TabId = MaterialType | "selling_point";
+
+export const MATERIAL_TABS: { id: TabId; label: string }[] = [
+  { id: "image",          label: "图片素材" },
+  { id: "selling_point",  label: "卖点讲解" },
+  { id: "demo_video",     label: "产品功能讲解" },
+  { id: "promo",          label: "宣发素材" },
 ];
 
 export interface Product {

@@ -228,18 +228,6 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
             </div>
           </div>
 
-          {/* 项目进度卡 */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3">快速导航</h3>
-            <div className="space-y-1">
-              {tabs.filter(t => t.id !== "info").map(({ id, label, icon: Icon }) => (
-                <button key={id} onClick={() => setActiveTab(id)}
-                  className={`flex items-center gap-2 w-full text-sm px-3 py-2 rounded-lg transition-colors ${activeTab === id ? "bg-indigo-50 text-indigo-600" : "text-gray-600 hover:bg-gray-50"}`}>
-                  <Icon size={14} />{label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 

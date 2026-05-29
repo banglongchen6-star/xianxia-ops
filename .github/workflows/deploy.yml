@@ -16,7 +16,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 15m
           script: |
-            cd /root/xianxia-ops
+            cd /home/admin/xianxia-ops
             git pull origin main
             npm install
             npm run build

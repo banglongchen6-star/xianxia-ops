@@ -1,5 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   LayoutDashboard, FolderKanban, Users, Bell,
   Package, Box, FolderOpen, Building2,
@@ -30,9 +31,16 @@ const NAV = [
 ] as const;
 
 export default function OpsApp() {
+  const router = useRouter();
   const { refresh, version, ready } = useOps();
   const [view, setView] = useState<View>("home");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (localStorage.getItem("ops_company_auth") !== "1") {
+      router.replace("/");
+    }
+  }, [router]);
 
   const unread = useMemo(() => messageStore.unreadCount("company"), [version]);
 

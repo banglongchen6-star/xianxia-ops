@@ -292,7 +292,7 @@ export function seedDemo() {
   projectStore.create({
     partnerId: p1.id, title: "天河城周末钢琴路演", province: "广东省", city: "广州市", district: "天河区",
     venue: "天河城购物中心 B1 中庭", eventDate: "2026-06-14", planStart: "14:00", planEnd: "17:00",
-    douyinAccount: "yueyin_live", status: "待审核",
+    douyinAccount: "yueyin_live", status: "执行中",
   });
   projectStore.create({
     partnerId: p2.id, title: "西湖银泰路演", province: "浙江省", city: "杭州市", district: "西湖区",

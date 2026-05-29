@@ -5,7 +5,7 @@ import { projectStore, partnerStore, messageStore, compressImage } from "@/lib/o
 import { Project, ProjectStatus, MediaItem, PROJECT_STATUSES } from "@/lib/ops/types";
 import { inp, Field, Btn, Modal, RegionSelect, StatusBadge, EmptyState } from "./ui";
 import { Breadcrumb } from "./ProfileViews";
-import { Plus, MapPin, Calendar, Clock, Video, Image as ImageIcon, Trash2, Upload, CheckCircle2, XCircle, AlertCircle, ShoppingCart, ListChecks, FileText, Wallet } from "lucide-react";
+import { Plus, MapPin, Calendar, Clock, Video, Image as ImageIcon, Trash2, Upload, ShoppingCart, ListChecks, FileText, Wallet } from "lucide-react";
 import OrdersTab from "./OrdersTab";
 import SettlementTab from "./SettlementTab";
 import MaterialsTab from "./MaterialsTab";
@@ -91,7 +91,6 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
   const [tick, setTick] = useState(0);
   const p = useMemo(() => projectStore.get(ctx.selectedId), [ctx.selectedId, tick]);
   const [editOpen, setEditOpen] = useState(false);
-  const [rejectOpen, setRejectOpen] = useState(false);
   const [settleOpen, setSettleOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>("info");
 
@@ -100,19 +99,9 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
   const reload = () => { setTick(t => t + 1); ctx.refresh(); };
 
   // ── 状态操作 ──
-  function submitForReview() {
-    projectStore.update(p!.id, { status: "待审核" });
-    messageStore.send("company", "新活动待审核", `${partner?.storeName} 提交了「${p!.title}」，请审核`, p!.id);
-    reload();
-  }
-  function resubmit() {
-    projectStore.update(p!.id, { status: "待审核", rejectReason: null });
-    messageStore.send("company", "活动重新提交", `${partner?.storeName} 修改后重新提交了「${p!.title}」`, p!.id);
-    reload();
-  }
-  function approve() {
+  function launch() {
     projectStore.update(p!.id, { status: "执行中" });
-    messageStore.send(p!.partnerId, "活动已通过审核", `「${p!.title}」已批准，请准备合同、物料与样品`, p!.id);
+    messageStore.send("company", "新活动已发起", `${partner?.storeName} 发起了「${p!.title}」`, p!.id);
     reload();
   }
   function settle() {
@@ -121,13 +110,13 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
     reload();
   }
 
-  const canPartnerEdit = !isCompany && (p.status === "草稿" || p.status === "已拒绝");
+  const canPartnerEdit = !isCompany && p.status === "草稿";
 
   // 哪些 tab 可见
   const showOrders = ["执行中", "待结算", "已结算"].includes(p.status);
   const showSettlement = isCompany && ["待结算", "已结算", "执行中"].includes(p.status);
   const showContract = ["执行中", "待结算", "已结算"].includes(p.status);
-  const showMaterials = !["草稿"].includes(p.status);
+  const showMaterials = ["执行中", "待结算", "已结算"].includes(p.status);
 
   const tabs: { id: DetailTab; label: string; icon: any }[] = [
     { id: "info", label: "基本信息", icon: MapPin },
@@ -143,18 +132,6 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
 
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-4">
-          {/* 拒绝原因提示 */}
-          {p.status === "已拒绝" && p.rejectReason && (
-            <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3">
-              <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-red-700">活动被退回</p>
-                <p className="text-sm text-red-600 mt-0.5">{p.rejectReason}</p>
-                {!isCompany && <p className="text-xs text-red-400 mt-1">修改后可重新提交审核</p>}
-              </div>
-            </div>
-          )}
-
           {/* Tab 导航 */}
           <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
             {tabs.map(({ id, label, icon: Icon }) => (
@@ -222,30 +199,21 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
             <div className="space-y-2">
               {/* 琴行操作 */}
               {canPartnerEdit && <Btn variant="outline" className="w-full" onClick={() => setEditOpen(true)}>编辑活动</Btn>}
-              {!isCompany && p.status === "草稿" && <Btn className="w-full" onClick={submitForReview}>提交审核</Btn>}
-              {!isCompany && p.status === "已拒绝" && <Btn className="w-full" onClick={resubmit}>重新提交审核</Btn>}
+              {!isCompany && p.status === "草稿" && (
+                <Btn className="w-full" onClick={launch}>发起活动</Btn>
+              )}
               {!isCompany && p.status === "执行中" && (
                 <Btn className="w-full" onClick={() => setSettleOpen(true)}>提交结算资料</Btn>
               )}
 
               {/* 公司操作 */}
-              {isCompany && p.status === "待审核" && (
-                <>
-                  <Btn className="w-full" onClick={approve}>
-                    <span className="flex items-center justify-center gap-1.5"><CheckCircle2 size={15} />批准（转执行中）</span>
-                  </Btn>
-                  <Btn variant="danger" className="w-full" onClick={() => setRejectOpen(true)}>
-                    <span className="flex items-center justify-center gap-1.5"><XCircle size={15} />退回</span>
-                  </Btn>
-                </>
-              )}
               {isCompany && p.status === "待结算" && (
                 <Btn className="w-full" onClick={settle}>确认结算</Btn>
               )}
 
               {/* 无操作提示 */}
-              {((isCompany && !["待审核", "待结算"].includes(p.status)) ||
-                (!isCompany && !["草稿", "已拒绝", "执行中"].includes(p.status))) && (
+              {((isCompany && p.status !== "待结算") ||
+                (!isCompany && !["草稿", "执行中"].includes(p.status))) && (
                 <p className="text-xs text-gray-400 text-center py-2">当前状态无可执行操作</p>
               )}
 
@@ -276,13 +244,6 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
 
       {editOpen && (
         <ProjectFormModal ctx={ctx} project={p} onClose={() => setEditOpen(false)} onDone={() => { setEditOpen(false); reload(); }} />
-      )}
-      {rejectOpen && (
-        <RejectModal onClose={() => setRejectOpen(false)} onConfirm={(reason) => {
-          projectStore.update(p.id, { status: "已拒绝", rejectReason: reason });
-          messageStore.send(p.partnerId, "活动被退回", reason, p.id);
-          setRejectOpen(false); reload();
-        }} />
       )}
       {settleOpen && (
         <SettlementModal project={p} onClose={() => setSettleOpen(false)} onDone={() => {
@@ -366,24 +327,6 @@ function ProjectFormModal({ ctx, project, onClose, onDone }: {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// 退回（拒绝原因）
-// ════════════════════════════════════════════════════════════════════════
-function RejectModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: (reason: string) => void }) {
-  const [reason, setReason] = useState("");
-  return (
-    <Modal title="退回活动" onClose={onClose}>
-      <Field label="退回原因" required hint="琴行会收到该原因，修改后可重新提交">
-        <textarea className={inp + " resize-none"} rows={3} value={reason} onChange={e => setReason(e.target.value)}
-          placeholder="例：地点人流量不足，建议换到XX广场" />
-      </Field>
-      <div className="flex gap-3 pt-3">
-        <Btn variant="danger" onClick={() => reason.trim() && onConfirm(reason)}>确认退回</Btn>
-        <Btn variant="outline" onClick={onClose}>取消</Btn>
-      </div>
-    </Modal>
-  );
-}
-
 // ════════════════════════════════════════════════════════════════════════
 // 提交结算资料（实际时段 + 切片 + ≥5 现场照片）
 // ════════════════════════════════════════════════════════════════════════

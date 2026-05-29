@@ -8,8 +8,6 @@ export const inp =
 
 export const STATUS_COLOR: Record<ProjectStatus, string> = {
   草稿: "bg-gray-100 text-gray-600",
-  待审核: "bg-amber-100 text-amber-700",
-  已拒绝: "bg-red-100 text-red-600",
   执行中: "bg-blue-100 text-blue-700",
   待结算: "bg-purple-100 text-purple-700",
   已结算: "bg-green-100 text-green-700",

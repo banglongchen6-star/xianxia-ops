@@ -3,11 +3,11 @@ import { useEffect, useState, useRef } from "react";
 import {
   Plus, Trash2, Upload, X, Loader2,
   Download, ArrowLeft, FolderOpen, Film, Package,
-  Image as ImageIcon, Star, ChevronRight, Camera, Archive,
+  Image as ImageIcon, Star, ChevronRight, Camera, Archive, Pencil,
 } from "lucide-react";
 import { Ctx } from "@/lib/ops/ctx";
 import {
-  fetchProducts, createProduct, deleteProduct, updateProductCover,
+  fetchProducts, createProduct, deleteProduct, updateProduct, updateProductCover,
   fetchProductFiles, uploadProductFile, deleteProductFile,
   Product, ProductFile, MaterialType, TabId, MATERIAL_TABS,
 } from "@/lib/supabase/products";
@@ -39,6 +39,8 @@ function CompanyFilesView() {
   const [booting, setBooting] = useState(true);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   useEffect(() => {
     fetchProducts()
@@ -65,6 +67,13 @@ function CompanyFilesView() {
     const rest = products.filter(p => p.id !== id);
     setProducts(rest);
     setSelId(rest[0]?.id ?? null);
+  }
+
+  async function saveEdit(id: string) {
+    if (!editingName.trim()) { setEditingId(null); return; }
+    await updateProduct(id, { name: editingName.trim() });
+    setProducts(prev => prev.map(p => p.id === id ? { ...p, name: editingName.trim() } : p));
+    setEditingId(null);
   }
 
   const sel = products.find(p => p.id === selId);
@@ -106,18 +115,41 @@ function CompanyFilesView() {
                       e.target.value = "";
                     }} />
                 </label>
-                {/* 产品名 */}
-                <button
-                  onClick={() => { setSelId(p.id); setTab("image"); }}
-                  className={`flex-1 text-left py-2.5 pl-2.5 pr-7 text-sm truncate ${active ? "text-indigo-700 font-medium" : "text-gray-700"}`}>
-                  {p.name}
-                </button>
-                {/* 删除 */}
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="absolute right-2.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0">
-                  <Trash2 size={13} />
-                </button>
+                {/* 产品名（双击或点铅笔进入编辑） */}
+                {editingId === p.id ? (
+                  <input
+                    autoFocus
+                    className="flex-1 py-2.5 pl-2.5 pr-2 text-sm bg-transparent border-b border-indigo-400 outline-none text-indigo-700"
+                    value={editingName}
+                    onChange={e => setEditingName(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") saveEdit(p.id);
+                      if (e.key === "Escape") setEditingId(null);
+                    }}
+                    onBlur={() => saveEdit(p.id)}
+                    onClick={e => e.stopPropagation()}
+                  />
+                ) : (
+                  <button
+                    onClick={() => { setSelId(p.id); setTab("image"); }}
+                    onDoubleClick={e => { e.stopPropagation(); setEditingId(p.id); setEditingName(p.name); }}
+                    className={`flex-1 text-left py-2.5 pl-2.5 pr-14 text-sm truncate ${active ? "text-indigo-700 font-medium" : "text-gray-700"}`}>
+                    {p.name}
+                  </button>
+                )}
+                {/* 编辑 + 删除（hover 显示） */}
+                <div className="absolute right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <button
+                    onClick={e => { e.stopPropagation(); setEditingId(p.id); setEditingName(p.name); }}
+                    className="p-1 text-gray-300 hover:text-indigo-500 transition-colors">
+                    <Pencil size={12} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="p-1 text-gray-300 hover:text-red-500 transition-colors">
+                    <Trash2 size={12} />
+                  </button>
+                </div>
               </div>
             );
           })}

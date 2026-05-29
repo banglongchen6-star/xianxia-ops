@@ -299,7 +299,7 @@ export function seedDemo() {
     venue: "西湖银泰城一楼广场", eventDate: "2026-06-20", planStart: "15:00", planEnd: "18:00",
     douyinAccount: "hexian_piano", status: "草稿",
   });
-  messageStore.send("company", "新活动待审核", "悦音琴行 提交了「天河城周末钢琴路演」，请审核", null);
+  messageStore.send("company", "新活动已发起", "悦音琴行 发起了「天河城周末钢琴路演」", null);
 
   // 演示产品
   if (productStore.list().length === 0) {

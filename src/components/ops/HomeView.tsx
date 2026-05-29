@@ -47,9 +47,9 @@ export default function HomeView({ ctx }: { ctx: Ctx }) {
   const unread = messageStore.unreadCount(ctx.session.partnerId ?? "");
   const counts = {
     草稿: mine.filter(p => p.status === "草稿").length,
-    待审核: mine.filter(p => p.status === "待审核").length,
     执行中: mine.filter(p => p.status === "执行中").length,
     待结算: mine.filter(p => p.status === "待结算").length,
+    已结算: mine.filter(p => p.status === "已结算").length,
   };
   return (
     <div className="p-6">

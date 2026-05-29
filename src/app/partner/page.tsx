@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   FolderKanban, User, Bell, Box, FolderOpen, Package, ShoppingCart, FileText,
-  LogOut, Music, Phone, ChevronRight, AlertCircle, UserPlus,
+  LogOut, Music, Phone, ChevronRight, AlertCircle, UserPlus, ArrowLeft,
 } from "lucide-react";
 import { partnerStore, messageStore, seedDemo } from "@/lib/ops/store";
 import { inp, Field, RegionSelect } from "@/components/ops/ui";
@@ -63,10 +64,18 @@ export default function PartnerPortal() {
 // ════════════════════════════════════════════════════════════════════════
 function LoginPage({ onLogin }: { onLogin: (id: string) => void }) {
   const [tab, setTab] = useState<"login" | "register">("login");
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
+        {/* 返回按钮 */}
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-1.5 text-indigo-200 hover:text-white text-sm mb-6 transition-colors">
+          <ArrowLeft size={15} />返回首页
+        </button>
+
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">

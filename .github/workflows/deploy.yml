@@ -20,6 +20,7 @@ jobs:
             git pull origin main
             npm install
             npm run build
-            pm2 restart xianxia-ops || pm2 start npm --name xianxia-ops -- start -- -p 3001
+            pm2 delete xianxia-ops 2>/dev/null || true
+            pm2 start npm --name xianxia-ops -- start -- -p 3001
             pm2 save
             echo "✅ Deploy done"

@@ -218,7 +218,7 @@ function RegisterForm({ onDone, onGoLogin }: { onDone: (id: string) => void; onG
 type PartnerView = "projects" | "project-detail" | "myprofile" | "samples" | "products" | "orders" | "contracts" | "files" | "messages";
 
 function PartnerApp({ partnerId, onLogout }: { partnerId: string; onLogout: () => void }) {
-  const [view, setView] = useState<PartnerView>("myprofile");
+  const [view, setView] = useState<PartnerView>("projects");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
 
@@ -242,13 +242,13 @@ function PartnerApp({ partnerId, onLogout }: { partnerId: string; onLogout: () =
   const ctx: Ctx = { session, refresh, go, selectedId };
 
   const nav: { id: PartnerView; label: string; icon: any; badge?: number }[] = [
-    { id: "myprofile",  label: "用户档案", icon: User },
-    { id: "projects",   label: "项目中心", icon: FolderKanban },
-    { id: "samples",    label: "样品管理", icon: Box },
+    { id: "projects",   label: "活动中心", icon: FolderKanban },
+    { id: "samples",    label: "样品物料", icon: Box },
     { id: "products",   label: "产品&提成", icon: Package },
-    { id: "orders",     label: "订单",     icon: ShoppingCart },
-    { id: "contracts",  label: "合同",     icon: FileText },
+    { id: "orders",     label: "订单&结算", icon: ShoppingCart },
+    { id: "contracts",  label: "合同&签订", icon: FileText },
     { id: "files",      label: "文件中心", icon: FolderOpen },
+    { id: "myprofile",  label: "用户档案", icon: User },
     { id: "messages",   label: "消息",     icon: Bell, badge: unread },
   ];
 

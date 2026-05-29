@@ -3,11 +3,11 @@ import { useEffect, useState, useRef } from "react";
 import {
   Plus, Trash2, Upload, X, Edit2, Loader2,
   Download, ArrowLeft, FolderOpen, Film, Package,
-  Image as ImageIcon, Star, Check, ChevronRight,
+  Image as ImageIcon, Star, Check, ChevronRight, Camera,
 } from "lucide-react";
 import { Ctx } from "@/lib/ops/ctx";
 import {
-  fetchProducts, createProduct, deleteProduct,
+  fetchProducts, createProduct, deleteProduct, updateProductCover,
   fetchProductFiles, uploadProductFile, saveSellingPoint, deleteProductFile,
   Product, ProductFile, MaterialType, MATERIAL_TABS,
 } from "@/lib/supabase/products";
@@ -81,24 +81,45 @@ function CompanyFilesView() {
           {products.length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">暂无产品</p>
           )}
-          {products.map(p => (
-            <div key={p.id} className="group relative">
-              <button
-                onClick={() => { setSelId(p.id); setTab("image"); }}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors pr-8 truncate ${
-                  selId === p.id
-                    ? "bg-indigo-50 text-indigo-700 font-medium"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}>
-                {p.name}
-              </button>
-              <button
-                onClick={() => handleDelete(p.id)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
-                <Trash2 size={13} />
-              </button>
-            </div>
-          ))}
+          {products.map(p => {
+            const active = selId === p.id;
+            return (
+              <div key={p.id}
+                className={`group relative flex items-center transition-colors ${active ? "bg-indigo-50" : "hover:bg-gray-50"}`}>
+                {/* 封面缩略图（点击换图） */}
+                <label className="relative ml-3 shrink-0 cursor-pointer" title="点击更换封面">
+                  <div className="w-9 h-9 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                    {p.cover_url
+                      ? <img src={p.cover_url} className="w-full h-full object-cover" />
+                      : <Package size={14} className="text-gray-300" />}
+                  </div>
+                  <div className="absolute inset-0 rounded-lg bg-black/0 group-hover:bg-black/50 flex items-center justify-center transition-all">
+                    <Camera size={11} className="text-white opacity-0 group-hover:opacity-100 transition-all" />
+                  </div>
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const url = await updateProductCover(p.id, file);
+                      setProducts(prev => prev.map(x => x.id === p.id ? { ...x, cover_url: url } : x));
+                      e.target.value = "";
+                    }} />
+                </label>
+                {/* 产品名（选中） */}
+                <button
+                  onClick={() => { setSelId(p.id); setTab("image"); }}
+                  className={`flex-1 text-left py-2.5 pl-2.5 pr-7 text-sm truncate ${active ? "text-indigo-700 font-medium" : "text-gray-700"}`}>
+                  {p.name}
+                </button>
+                {/* 删除 */}
+                <button
+                  onClick={() => handleDelete(p.id)}
+                  className="absolute right-2.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            );
+          })}
         </nav>
         <div className="p-3 border-t border-gray-100">
           {adding ? (
@@ -218,14 +239,20 @@ function PartnerFilesView() {
               <button
                 key={p.id}
                 onClick={() => { setSelId(p.id); setTab("image"); }}
-                className="bg-white border border-gray-100 rounded-2xl p-5 text-left hover:border-indigo-200 hover:shadow-md transition-all group">
-                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center mb-3 group-hover:bg-indigo-100 transition-colors">
-                  <Package size={20} className="text-indigo-500" />
+                className="bg-white border border-gray-100 rounded-2xl overflow-hidden text-left hover:border-indigo-200 hover:shadow-lg transition-all group">
+                {/* 封面图 */}
+                <div className="h-36 bg-gradient-to-br from-indigo-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                  {p.cover_url
+                    ? <img src={p.cover_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    : <Package size={36} className="text-indigo-200" />}
                 </div>
-                <p className="font-semibold text-gray-900 text-sm truncate">{p.name}</p>
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-0.5">
-                  查看素材 <ChevronRight size={11} />
-                </p>
+                {/* 信息 */}
+                <div className="p-4">
+                  <p className="font-semibold text-gray-900 text-sm truncate">{p.name}</p>
+                  <p className="text-xs text-gray-400 mt-1 flex items-center gap-0.5">
+                    查看素材 <ChevronRight size={11} />
+                  </p>
+                </div>
               </button>
             ))}
           </div>

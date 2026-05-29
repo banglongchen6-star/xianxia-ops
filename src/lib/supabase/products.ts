@@ -21,6 +21,8 @@ export interface Product {
   description: string;
   sort_order: number;
   created_at: string;
+  cover_image_path: string | null;
+  cover_url?: string;
 }
 
 export interface ProductFile {
@@ -58,7 +60,21 @@ export async function fetchProducts(): Promise<Product[]> {
     .order("sort_order")
     .order("created_at");
   if (error) throw error;
-  return (data ?? []) as Product[];
+  return ((data ?? []) as Product[]).map(p => ({
+    ...p,
+    cover_url: p.cover_image_path
+      ? sb().storage.from("files").getPublicUrl(p.cover_image_path).data.publicUrl
+      : undefined,
+  }));
+}
+
+export async function updateProductCover(id: string, file: File): Promise<string> {
+  const safe = file.name.replace(/[^a-zA-Z0-9._一-龥-]/g, "_");
+  const path = `products/${id}/cover/${Date.now()}_${safe}`;
+  const { error } = await sb().storage.from("files").upload(path, file, { upsert: true });
+  if (error) throw error;
+  await sb().from("products").update({ cover_image_path: path }).eq("id", id);
+  return sb().storage.from("files").getPublicUrl(path).data.publicUrl;
 }
 
 export async function createProduct(name: string, description = ""): Promise<Product> {

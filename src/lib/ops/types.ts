@@ -85,3 +85,136 @@ export interface Message {
   read: boolean;
   createdAt: string;
 }
+
+// ════════════════════════════════════════════════════════════════════════
+// 二期：产品&提成 / 订单 / 结算
+// ════════════════════════════════════════════════════════════════════════
+
+// ── 产品目录 ─────────────────────────────────────────────────────────────
+export type CommissionType = "percent" | "fixed";
+
+export interface Product {
+  id: string;
+  name: string;           // 产品名称
+  model: string;          // 型号
+  price: number;          // 建议零售价（元）
+  commissionType: CommissionType; // percent=比例提成, fixed=固定提成
+  commissionValue: number;        // 比例时填 0-100（%），固定时填元
+  description: string;
+  stock: number;
+  createdAt: string;
+}
+
+// ── 订单 ─────────────────────────────────────────────────────────────────
+export type ShippingStatus = "待发货" | "已发货" | "已签收";
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  qty: number;
+  unitPrice: number;          // 实际成交价
+  commissionType: CommissionType;
+  commissionValue: number;
+  commissionAmount: number;   // 计算后提成金额
+}
+
+export interface Order {
+  id: string;
+  projectId: string;
+  partnerId: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  items: OrderItem[];
+  totalAmount: number;        // 总销售额
+  totalCommission: number;    // 总提成
+  paymentSide: "公司收款" | "琴行收款";
+  shippingStatus: ShippingStatus;
+  trackingNumber: string | null;
+  notes: string;
+  createdAt: string;
+}
+
+// ── 结算单 ───────────────────────────────────────────────────────────────
+export interface Settlement {
+  id: string;
+  projectId: string;
+  laborFee: number;           // 劳务费（公司手动填入）
+  totalCommission: number;    // 自动汇总订单提成
+  totalPayout: number;        // 劳务费 + 提成
+  paidAt: string | null;
+  voucherDataUrl: string | null; // 打款凭证图片
+  notes: string;
+  createdAt: string;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// 三期：样品物料 / 合同 / 文件中心
+// ════════════════════════════════════════════════════════════════════════
+
+// ── 样品库 ───────────────────────────────────────────────────────────────
+export type SampleStatus = "在库" | "已发出" | "已归还";
+
+export interface Sample {
+  id: string;
+  name: string;
+  model: string;
+  serial: string;             // 序列号/编号
+  status: SampleStatus;
+  currentPartnerId: string | null;
+  expectedReturnDate: string | null;
+  notes: string;
+  createdAt: string;
+}
+
+// ── 物料主库 ─────────────────────────────────────────────────────────────
+export interface Material {
+  id: string;
+  name: string;
+  category: string;
+  notes: string;
+  createdAt: string;
+}
+
+// ── 活动物料清单 ─────────────────────────────────────────────────────────
+export interface ActivityMaterial {
+  id: string;
+  projectId: string;
+  materialId: string | null;  // 关联物料主库（null=临时新增）
+  materialName: string;
+  quantity: number;
+  preparedBy: "公司" | "琴行";
+  done: boolean;
+  notes: string;
+  createdAt: string;
+}
+
+// ── 合同 ─────────────────────────────────────────────────────────────────
+export interface Contract {
+  id: string;
+  projectId: string;
+  partnerId: string;
+  content: string;              // 合同正文（模板填充后可编辑）
+  partnerSignature: string | null; // 琴行手写签名 dataUrl
+  companySeal: string | null;      // 公司盖章（预设图片 dataUrl）
+  signedAt: string | null;
+  createdAt: string;
+}
+
+// ── 文件中心 ─────────────────────────────────────────────────────────────
+export interface ResourceCategory {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface ResourceFile {
+  id: string;
+  categoryId: string;
+  name: string;
+  description: string;
+  dataUrl: string;
+  mimeType: string;
+  size: number;               // 原始字节数
+  createdAt: string;
+}

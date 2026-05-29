@@ -5,7 +5,13 @@ import { projectStore, partnerStore, messageStore, compressImage } from "@/lib/o
 import { Project, ProjectStatus, MediaItem, PROJECT_STATUSES } from "@/lib/ops/types";
 import { inp, Field, Btn, Modal, RegionSelect, StatusBadge, EmptyState } from "./ui";
 import { Breadcrumb } from "./ProfileViews";
-import { Plus, MapPin, Calendar, Clock, Video, Image as ImageIcon, Trash2, Upload, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Plus, MapPin, Calendar, Clock, Video, Image as ImageIcon, Trash2, Upload, CheckCircle2, XCircle, AlertCircle, ShoppingCart, ListChecks, FileText, Wallet } from "lucide-react";
+import OrdersTab from "./OrdersTab";
+import SettlementTab from "./SettlementTab";
+import MaterialsTab from "./MaterialsTab";
+import ContractTab from "./ContractTab";
+
+type DetailTab = "info" | "orders" | "materials" | "contract" | "settlement";
 
 // ════════════════════════════════════════════════════════════════════════
 // 项目列表
@@ -87,6 +93,7 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
   const [editOpen, setEditOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [settleOpen, setSettleOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<DetailTab>("info");
 
   if (!p) return <EmptyState text="未找到该项目" />;
   const partner = partnerStore.get(p.partnerId);
@@ -116,12 +123,26 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
 
   const canPartnerEdit = !isCompany && (p.status === "草稿" || p.status === "已拒绝");
 
+  // 哪些 tab 可见
+  const showOrders = ["执行中", "待结算", "已结算"].includes(p.status);
+  const showSettlement = isCompany && ["待结算", "已结算", "执行中"].includes(p.status);
+  const showContract = ["执行中", "待结算", "已结算"].includes(p.status);
+  const showMaterials = !["草稿"].includes(p.status);
+
+  const tabs: { id: DetailTab; label: string; icon: any }[] = [
+    { id: "info", label: "基本信息", icon: MapPin },
+    ...(showOrders ? [{ id: "orders" as DetailTab, label: "订单", icon: ShoppingCart }] : []),
+    ...(showMaterials ? [{ id: "materials" as DetailTab, label: "物料清单", icon: ListChecks }] : []),
+    ...(showContract ? [{ id: "contract" as DetailTab, label: "合同", icon: FileText }] : []),
+    ...(showSettlement ? [{ id: "settlement" as DetailTab, label: "结算", icon: Wallet }] : []),
+  ];
+
   return (
     <div className="p-6">
       <Breadcrumb back={isCompany ? "项目中心" : "我的项目"} current={p.title} onBack={() => ctx.go("projects")} />
 
       <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2 space-y-5">
+        <div className="col-span-2 space-y-4">
           {/* 拒绝原因提示 */}
           {p.status === "已拒绝" && p.rejectReason && (
             <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex gap-3">
@@ -134,34 +155,64 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
             </div>
           )}
 
-          {/* 基本信息 */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">{p.title}</h2>
-                <p className="text-sm text-gray-400 mt-0.5">{partner?.storeName}</p>
-              </div>
-              <StatusBadge status={p.status} />
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-              <Info icon={MapPin} label="地点" value={`${p.province}${p.city}${p.district} ${p.venue}`} />
-              <Info icon={Calendar} label="活动日期" value={p.eventDate || "待定"} />
-              <Info icon={Clock} label="计划时段" value={p.planStart && p.planEnd ? `${p.planStart} – ${p.planEnd}` : "待定"} />
-              <Info icon={Video} label="抖音账号" value={p.douyinAccount} />
-            </div>
+          {/* Tab 导航 */}
+          <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button key={id} onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeTab === id ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                <Icon size={13} />{label}
+              </button>
+            ))}
           </div>
 
-          {/* 结算资料（待结算/已结算时展示） */}
-          {(p.status === "待结算" || p.status === "已结算") && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">结算资料</h3>
-              <div className="text-sm text-gray-600 mb-3">
-                实际直播时段：<span className="text-gray-800 font-medium">{p.liveStart} – {p.liveEnd}</span>
-              </div>
-              <MediaGallery title={`直播切片 (${p.liveClips.length})`} items={p.liveClips} />
-              <MediaGallery title={`现场照片 (${p.scenePhotos.length})`} items={p.scenePhotos} />
-            </div>
-          )}
+          {/* Tab 内容 */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            {activeTab === "info" && (
+              <>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">{p.title}</h2>
+                    <p className="text-sm text-gray-400 mt-0.5">{partner?.storeName}</p>
+                  </div>
+                  <StatusBadge status={p.status} />
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <Info icon={MapPin} label="地点" value={`${p.province}${p.city}${p.district} ${p.venue}`} />
+                  <Info icon={Calendar} label="活动日期" value={p.eventDate || "待定"} />
+                  <Info icon={Clock} label="计划时段" value={p.planStart && p.planEnd ? `${p.planStart} – ${p.planEnd}` : "待定"} />
+                  <Info icon={Video} label="抖音账号" value={p.douyinAccount} />
+                </div>
+
+                {/* 结算资料（待结算/已结算时展示） */}
+                {(p.status === "待结算" || p.status === "已结算") && (
+                  <div className="mt-5 pt-4 border-t border-gray-50">
+                    <h3 className="text-sm font-semibold text-gray-800 mb-3">提交的结算资料</h3>
+                    <div className="text-sm text-gray-600 mb-3">
+                      实际直播时段：<span className="text-gray-800 font-medium">{p.liveStart} – {p.liveEnd}</span>
+                    </div>
+                    <MediaGallery title={`直播切片 (${p.liveClips.length})`} items={p.liveClips} />
+                    <MediaGallery title={`现场照片 (${p.scenePhotos.length})`} items={p.scenePhotos} />
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === "orders" && (
+              <OrdersTab project={p} isCompany={isCompany} />
+            )}
+
+            {activeTab === "materials" && (
+              <MaterialsTab project={p} isCompany={isCompany} />
+            )}
+
+            {activeTab === "contract" && (
+              <ContractTab project={p} isCompany={isCompany} />
+            )}
+
+            {activeTab === "settlement" && (
+              <SettlementTab project={p} isCompany={isCompany} onSettle={settle} />
+            )}
+          </div>
         </div>
 
         {/* 操作侧栏 */}
@@ -180,8 +231,12 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
               {/* 公司操作 */}
               {isCompany && p.status === "待审核" && (
                 <>
-                  <Btn className="w-full" onClick={approve}><span className="flex items-center justify-center gap-1.5"><CheckCircle2 size={15} />批准（转执行中）</span></Btn>
-                  <Btn variant="danger" className="w-full" onClick={() => setRejectOpen(true)}><span className="flex items-center justify-center gap-1.5"><XCircle size={15} />退回</span></Btn>
+                  <Btn className="w-full" onClick={approve}>
+                    <span className="flex items-center justify-center gap-1.5"><CheckCircle2 size={15} />批准（转执行中）</span>
+                  </Btn>
+                  <Btn variant="danger" className="w-full" onClick={() => setRejectOpen(true)}>
+                    <span className="flex items-center justify-center gap-1.5"><XCircle size={15} />退回</span>
+                  </Btn>
                 </>
               )}
               {isCompany && p.status === "待结算" && (
@@ -195,23 +250,27 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
               )}
 
               {canPartnerEdit && (
-                <button onClick={() => { if (confirm("确认删除该项目？")) { projectStore.delete(p.id); ctx.refresh(); ctx.go("projects"); } }}
-                  className="w-full text-xs text-red-400 hover:text-red-600 py-2 mt-1">删除项目</button>
+                <button
+                  onClick={() => { if (confirm("确认删除该项目？")) { projectStore.delete(p.id); ctx.refresh(); ctx.go("projects"); } }}
+                  className="w-full text-xs text-red-400 hover:text-red-600 py-2 mt-1">
+                  删除项目
+                </button>
               )}
             </div>
           </div>
 
-          {/* 执行中阶段提示（合同/物料/样品 → 二三期） */}
-          {p.status === "执行中" && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <h3 className="text-sm font-semibold text-gray-800 mb-2">执行阶段待办</h3>
-              <ul className="text-sm text-gray-400 space-y-1.5">
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gray-300" />合同签署（三期）</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gray-300" />物料清单（三期）</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gray-300" />样品发放（三期）</li>
-              </ul>
+          {/* 项目进度卡 */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">快速导航</h3>
+            <div className="space-y-1">
+              {tabs.filter(t => t.id !== "info").map(({ id, label, icon: Icon }) => (
+                <button key={id} onClick={() => setActiveTab(id)}
+                  className={`flex items-center gap-2 w-full text-sm px-3 py-2 rounded-lg transition-colors ${activeTab === id ? "bg-indigo-50 text-indigo-600" : "text-gray-600 hover:bg-gray-50"}`}>
+                  <Icon size={14} />{label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
 

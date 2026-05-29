@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import {
   LayoutDashboard, FolderKanban, Users, User, Bell, Building2, ChevronDown, Plus,
+  Package, Box, FolderOpen,
 } from "lucide-react";
 import { useOps } from "@/lib/ops/useOps";
 import { partnerStore, projectStore, messageStore } from "@/lib/ops/store";
@@ -10,11 +11,15 @@ import HomeView from "@/components/ops/HomeView";
 import { PartnersView, PartnerDetailView, MyProfileView } from "@/components/ops/ProfileViews";
 import { ProjectsView, ProjectDetailView } from "@/components/ops/ProjectViews";
 import MessagesView from "@/components/ops/MessagesView";
+import ProductsView from "@/components/ops/ProductsView";
+import SamplesView from "@/components/ops/SamplesView";
+import FilesView from "@/components/ops/FilesView";
 import RegisterPartnerModal from "@/components/ops/RegisterPartnerModal";
 
 export type View =
   | "home" | "projects" | "project-detail"
-  | "partners" | "partner-detail" | "myprofile" | "messages";
+  | "partners" | "partner-detail" | "myprofile" | "messages"
+  | "products" | "samples" | "files";
 
 export interface Ctx {
   session: Session;
@@ -56,12 +61,17 @@ export default function OpsApp() {
         { id: "home", icon: LayoutDashboard, label: "待办看板" },
         { id: "projects", icon: FolderKanban, label: "项目中心" },
         { id: "partners", icon: Users, label: "用户档案" },
+        { id: "products", icon: Package, label: "产品管理" },
+        { id: "samples", icon: Box, label: "样品物料" },
+        { id: "files", icon: FolderOpen, label: "文件中心" },
         { id: "messages", icon: Bell, label: "消息", badge: unread },
       ]
     : [
         { id: "home", icon: LayoutDashboard, label: "首页" },
         { id: "projects", icon: FolderKanban, label: "我的项目" },
         { id: "myprofile", icon: User, label: "我的档案" },
+        { id: "samples", icon: Box, label: "样品物料" },
+        { id: "files", icon: FolderOpen, label: "文件中心" },
         { id: "messages", icon: Bell, label: "消息", badge: unread },
       ];
 
@@ -86,7 +96,10 @@ export default function OpsApp() {
           {nav.map(({ id, icon: Icon, label, badge }) => {
             const active = view === id ||
               (id === "projects" && view === "project-detail") ||
-              (id === "partners" && view === "partner-detail");
+              (id === "partners" && view === "partner-detail") ||
+              (id === "products" && view === "products") ||
+              (id === "samples" && view === "samples") ||
+              (id === "files" && view === "files");
             return (
               <button key={id} onClick={() => go(id as View)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors ${active ? "bg-indigo-600 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"}`}>
@@ -146,6 +159,9 @@ export default function OpsApp() {
           {view === "partner-detail" && isCompany && <PartnerDetailView ctx={ctx} />}
           {view === "myprofile" && !isCompany && <MyProfileView ctx={ctx} />}
           {view === "messages" && <MessagesView ctx={ctx} />}
+          {view === "products" && <ProductsView ctx={ctx} />}
+          {view === "samples" && <SamplesView ctx={ctx} />}
+          {view === "files" && <FilesView ctx={ctx} />}
         </main>
       </div>
 

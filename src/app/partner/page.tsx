@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   FolderKanban, User, Bell, Box, FolderOpen, Package, ShoppingCart, FileText,
-  LogOut, Music, Phone, ChevronRight, AlertCircle, UserPlus, ArrowLeft,
+  LogOut, Music, Phone, ChevronRight, AlertCircle, UserPlus,
 } from "lucide-react";
 import { partnerStore, messageStore, seedDemo } from "@/lib/ops/store";
 import { inp, Field, RegionSelect } from "@/components/ops/ui";
@@ -69,13 +69,6 @@ function LoginPage({ onLogin }: { onLogin: (id: string) => void }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* 返回按钮 */}
-        <button
-          onClick={() => router.push("/")}
-          className="flex items-center gap-1.5 text-indigo-200 hover:text-white text-sm mb-6 transition-colors">
-          <ArrowLeft size={15} />返回首页
-        </button>
-
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -99,7 +92,7 @@ function LoginPage({ onLogin }: { onLogin: (id: string) => void }) {
           </div>
 
           <div className="p-6">
-            {tab === "login"    && <LoginForm onLogin={onLogin} onGoRegister={() => setTab("register")} />}
+            {tab === "login"    && <LoginForm onLogin={onLogin} onGoRegister={() => setTab("register")} onBack={() => router.push("/")} />}
             {tab === "register" && <RegisterForm onDone={onLogin} onGoLogin={() => setTab("login")} />}
           </div>
         </div>
@@ -113,7 +106,7 @@ function LoginPage({ onLogin }: { onLogin: (id: string) => void }) {
 }
 
 // ── 登录表单 ────────────────────────────────────────────────────────────
-function LoginForm({ onLogin, onGoRegister }: { onLogin: (id: string) => void; onGoRegister: () => void }) {
+function LoginForm({ onLogin, onGoRegister, onBack }: { onLogin: (id: string) => void; onGoRegister: () => void; onBack: () => void }) {
   const [phone, setPhone] = useState("");
   const [err, setErr] = useState("");
 
@@ -144,10 +137,16 @@ function LoginForm({ onLogin, onGoRegister }: { onLogin: (id: string) => void; o
           inputMode="numeric"
         />
       </div>
-      <button onClick={find}
-        className="w-full bg-indigo-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-        登录 <ChevronRight size={16} />
-      </button>
+      <div className="flex gap-3">
+        <button onClick={find}
+          className="flex-1 bg-indigo-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-indigo-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          登录 <ChevronRight size={16} />
+        </button>
+        <button onClick={onBack}
+          className="px-5 border border-gray-200 text-gray-500 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+          返回
+        </button>
+      </div>
     </div>
   );
 }

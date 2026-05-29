@@ -14,18 +14,16 @@ export default function HomeView({ ctx }: { ctx: Ctx }) {
   );
 
   if (isCompany) {
-    const pending = all.filter(p => p.status === "待审核");
     const settling = all.filter(p => p.status === "待结算");
     const running = all.filter(p => p.status === "执行中");
     const cards = [
-      { label: "待审核活动", value: pending.length, icon: ClipboardCheck, color: "text-amber-600", items: pending },
-      { label: "待结算活动", value: settling.length, icon: Wallet, color: "text-purple-600", items: settling },
       { label: "执行中活动", value: running.length, icon: FolderKanban, color: "text-blue-600", items: running },
+      { label: "待结算活动", value: settling.length, icon: Wallet, color: "text-purple-600", items: settling },
     ];
     return (
       <div className="p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">待办看板</h2>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-8">
           {cards.map(c => (
             <div key={c.label} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between">
@@ -38,7 +36,7 @@ export default function HomeView({ ctx }: { ctx: Ctx }) {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <TodoList title="待审核" items={cards[0].items} ctx={ctx} />
+          <TodoList title="执行中" items={cards[0].items} ctx={ctx} />
           <TodoList title="待结算" items={cards[1].items} ctx={ctx} />
         </div>
       </div>

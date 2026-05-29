@@ -2,8 +2,9 @@
 import {
   Partner, Project, Message, Session, ProjectStatus, MediaItem,
   Product, Order, OrderItem, Settlement,
-  Sample, Material, ActivityMaterial, Contract,
-  ResourceCategory, ResourceFile,
+  MaterialLibItem, MaterialUnit, UnitStatus,
+  ChecklistItem, MaterialRequest, MaterialRequestStatus,
+  Contract, ResourceCategory, ResourceFile,
 } from "./types";
 
 // ── 工具 ──────────────────────────────────────────────────────────────
@@ -23,7 +24,8 @@ function save(key: string, val: unknown) {
 const K = {
   partners: "ops_partners", projects: "ops_projects", messages: "ops_messages", session: "ops_session",
   products: "ops_products", orders: "ops_orders", settlements: "ops_settlements",
-  samples: "ops_samples", materials: "ops_materials", activityMaterials: "ops_activity_materials",
+  materialLib: "ops_material_lib", materialUnits: "ops_material_units",
+  checklistItems: "ops_checklist_items", materialRequests: "ops_material_requests",
   contracts: "ops_contracts",
   resourceCategories: "ops_resource_categories", resourceFiles: "ops_resource_files",
 };
@@ -163,46 +165,63 @@ export const settlementStore = {
   },
 };
 
-// ── 样品 ──────────────────────────────────────────────────────────────
-export const sampleStore = {
-  list(): Sample[] { return load<Sample[]>(K.samples, []); },
-  get(id: string | null) { return id ? this.list().find(s => s.id === id) ?? null : null; },
-  create(data: Omit<Sample, "id" | "createdAt">): Sample {
-    const rec: Sample = { ...data, id: uid(), createdAt: now() };
-    const all = this.list(); all.push(rec); save(K.samples, all); return rec;
-  },
-  update(id: string, data: Partial<Sample>) {
-    save(K.samples, this.list().map(s => s.id === id ? { ...s, ...data } : s));
-  },
-  delete(id: string) { save(K.samples, this.list().filter(s => s.id !== id)); },
-};
-
-// ── 物料主库 ──────────────────────────────────────────────────────────
-export const materialStore = {
-  list(): Material[] { return load<Material[]>(K.materials, []); },
+// ── 统一物料库 ────────────────────────────────────────────────────────
+export const materialLibStore = {
+  list(): MaterialLibItem[] { return load<MaterialLibItem[]>(K.materialLib, []); },
   get(id: string | null) { return id ? this.list().find(m => m.id === id) ?? null : null; },
-  create(data: Omit<Material, "id" | "createdAt">): Material {
-    const rec: Material = { ...data, id: uid(), createdAt: now() };
-    const all = this.list(); all.push(rec); save(K.materials, all); return rec;
+  create(data: Omit<MaterialLibItem, "id" | "createdAt">): MaterialLibItem {
+    const rec: MaterialLibItem = { ...data, id: uid(), createdAt: now() };
+    const all = this.list(); all.push(rec); save(K.materialLib, all); return rec;
   },
-  update(id: string, data: Partial<Material>) {
-    save(K.materials, this.list().map(m => m.id === id ? { ...m, ...data } : m));
+  update(id: string, data: Partial<MaterialLibItem>) {
+    save(K.materialLib, this.list().map(m => m.id === id ? { ...m, ...data } : m));
   },
-  delete(id: string) { save(K.materials, this.list().filter(m => m.id !== id)); },
+  delete(id: string) { save(K.materialLib, this.list().filter(m => m.id !== id)); },
 };
 
-// ── 活动物料清单 ──────────────────────────────────────────────────────
-export const activityMaterialStore = {
-  list(): ActivityMaterial[] { return load<ActivityMaterial[]>(K.activityMaterials, []); },
-  byProject(projectId: string) { return this.list().filter(m => m.projectId === projectId); },
-  create(data: Omit<ActivityMaterial, "id" | "createdAt">): ActivityMaterial {
-    const rec: ActivityMaterial = { ...data, id: uid(), createdAt: now() };
-    const all = this.list(); all.push(rec); save(K.activityMaterials, all); return rec;
+// ── 物料实物单元（可追踪类） ──────────────────────────────────────────
+export const materialUnitStore = {
+  list(): MaterialUnit[] { return load<MaterialUnit[]>(K.materialUnits, []); },
+  byLibItem(libItemId: string) { return this.list().filter(u => u.libItemId === libItemId); },
+  byPartner(partnerId: string) { return this.list().filter(u => u.currentPartnerId === partnerId); },
+  create(data: Omit<MaterialUnit, "id" | "createdAt">): MaterialUnit {
+    const rec: MaterialUnit = { ...data, id: uid(), createdAt: now() };
+    const all = this.list(); all.push(rec); save(K.materialUnits, all); return rec;
   },
-  update(id: string, data: Partial<ActivityMaterial>) {
-    save(K.activityMaterials, this.list().map(m => m.id === id ? { ...m, ...data } : m));
+  update(id: string, data: Partial<MaterialUnit>) {
+    save(K.materialUnits, this.list().map(u => u.id === id ? { ...u, ...data } : u));
   },
-  delete(id: string) { save(K.activityMaterials, this.list().filter(m => m.id !== id)); },
+  delete(id: string) { save(K.materialUnits, this.list().filter(u => u.id !== id)); },
+};
+
+// ── 活动物料清单条目 ──────────────────────────────────────────────────
+export const checklistStore = {
+  list(): ChecklistItem[] { return load<ChecklistItem[]>(K.checklistItems, []); },
+  byProject(projectId: string) { return this.list().filter(i => i.projectId === projectId); },
+  create(data: Omit<ChecklistItem, "id" | "createdAt">): ChecklistItem {
+    const rec: ChecklistItem = { ...data, id: uid(), createdAt: now() };
+    const all = this.list(); all.push(rec); save(K.checklistItems, all); return rec;
+  },
+  update(id: string, data: Partial<ChecklistItem>) {
+    save(K.checklistItems, this.list().map(i => i.id === id ? { ...i, ...data } : i));
+  },
+  delete(id: string) { save(K.checklistItems, this.list().filter(i => i.id !== id)); },
+  deleteByProject(projectId: string) { save(K.checklistItems, this.list().filter(i => i.projectId !== projectId)); },
+};
+
+// ── 物料申请单 ────────────────────────────────────────────────────────
+export const materialRequestStore = {
+  list(): MaterialRequest[] { return load<MaterialRequest[]>(K.materialRequests, []); },
+  byProject(projectId: string) { return this.list().find(r => r.projectId === projectId) ?? null; },
+  byPartner(partnerId: string) { return this.list().filter(r => r.partnerId === partnerId); },
+  create(data: Omit<MaterialRequest, "id" | "createdAt">): MaterialRequest {
+    const rec: MaterialRequest = { ...data, id: uid(), createdAt: now() };
+    const all = this.list(); all.push(rec); save(K.materialRequests, all); return rec;
+  },
+  update(id: string, data: Partial<MaterialRequest>) {
+    save(K.materialRequests, this.list().map(r => r.id === id ? { ...r, ...data } : r));
+  },
+  delete(id: string) { save(K.materialRequests, this.list().filter(r => r.id !== id)); },
 };
 
 // ── 合同 ──────────────────────────────────────────────────────────────
@@ -289,12 +308,13 @@ export function seedDemo() {
     productStore.create({ name: "音乐密码半年课", model: "MK-HALF-1", price: 2180, commissionType: "percent", commissionValue: 12, description: "半年智能课程", stock: 999 });
   }
 
-  // 演示物料主库
-  if (materialStore.list().length === 0) {
-    materialStore.create({ name: "易拉宝", category: "宣传物料", notes: "2米高，展示品牌形象" });
-    materialStore.create({ name: "产品宣传册", category: "宣传物料", notes: "A4折页，每次带50份" });
-    materialStore.create({ name: "桌布", category: "展台物料", notes: "带Logo蓝色桌布" });
-    materialStore.create({ name: "音响设备", category: "演出设备", notes: "便携蓝牙音响" });
+  // 演示物料库
+  if (materialLibStore.list().length === 0) {
+    materialLibStore.create({ name: "智能钢琴样机", category: "展示样品", notes: "演示用实机，需归还", trackable: true });
+    materialLibStore.create({ name: "易拉宝", category: "宣传物料", notes: "2米高，展示品牌形象", trackable: false });
+    materialLibStore.create({ name: "产品宣传册", category: "宣传物料", notes: "A4折页，每次带50份", trackable: false });
+    materialLibStore.create({ name: "桌布", category: "展台物料", notes: "带Logo蓝色桌布", trackable: false });
+    materialLibStore.create({ name: "音响设备", category: "演出设备", notes: "便携蓝牙音响", trackable: true });
   }
 
   // 演示文件分类

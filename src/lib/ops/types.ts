@@ -152,41 +152,63 @@ export interface Settlement {
 // 三期：样品物料 / 合同 / 文件中心
 // ════════════════════════════════════════════════════════════════════════
 
-// ── 样品库 ───────────────────────────────────────────────────────────────
-export type SampleStatus = "在库" | "已发出" | "已归还";
-
-export interface Sample {
+// ── 统一物料库 ─────────────────────────────────────────────────────────
+export interface MaterialLibItem {
   id: string;
   name: string;
-  model: string;
-  serial: string;             // 序列号/编号
-  status: SampleStatus;
+  category: string;
+  notes: string;
+  trackable: boolean;   // 需要序列号/持有人追踪（样品/设备类）
+  createdAt: string;
+}
+
+// ── 可追踪物料的实物单元（序列号级别管理） ────────────────────────────
+export type UnitStatus = "在库" | "已发出" | "已归还";
+
+export interface MaterialUnit {
+  id: string;
+  libItemId: string;
+  serial: string;
+  status: UnitStatus;
   currentPartnerId: string | null;
   expectedReturnDate: string | null;
   notes: string;
   createdAt: string;
 }
 
-// ── 物料主库 ─────────────────────────────────────────────────────────────
-export interface Material {
+// ── 活动物料清单条目 ─────────────────────────────────────────────────
+export interface ChecklistItem {
   id: string;
+  projectId: string;
+  libItemId: string | null;           // null = 自定义条目
   name: string;
   category: string;
+  source: "company" | "partner";      // 谁添加的
+  preparedBy: "自备" | "公司备" | null; // null = 客户未填
+  quantity: number;
   notes: string;
+  companyNotes: string;               // 公司审核时的备注
   createdAt: string;
 }
 
-// ── 活动物料清单 ─────────────────────────────────────────────────────────
-export interface ActivityMaterial {
+// ── 物料申请单 ──────────────────────────────────────────────────────
+export type MaterialRequestStatus = "待处理" | "已锁定" | "已完成";
+
+export interface MaterialRequest {
   id: string;
   projectId: string;
-  materialId: string | null;  // 关联物料主库（null=临时新增）
-  materialName: string;
-  quantity: number;
-  preparedBy: "公司" | "琴行";
-  done: boolean;
-  notes: string;
+  partnerId: string;
+  status: MaterialRequestStatus;
+  receiverName: string;
+  receiverPhone: string;
+  receiverAddress: string;
+  partnerNotes: string;
+  trackingNumbers: string[];
+  companyNotes: string;
+  lockedAt: string | null;
+  completedAt: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 // ── 合同 ─────────────────────────────────────────────────────────────────

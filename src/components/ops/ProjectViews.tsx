@@ -172,6 +172,22 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
                     <MediaGallery title={`现场照片 (${p.scenePhotos.length})`} items={p.scenePhotos} />
                   </div>
                 )}
+
+                {/* 客户端操作按钮 */}
+                {!isCompany && (
+                  <div className="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-2 items-center">
+                    {canPartnerEdit && <Btn variant="outline" onClick={() => setEditOpen(true)}>编辑活动</Btn>}
+                    {p.status === "草稿" && <Btn onClick={launch}>发起活动</Btn>}
+                    {p.status === "执行中" && <Btn onClick={() => setSettleOpen(true)}>提交结算资料</Btn>}
+                    {canPartnerEdit && (
+                      <button
+                        onClick={() => { if (confirm("确认删除该项目？")) { projectStore.delete(p.id); ctx.refresh(); ctx.go("projects"); } }}
+                        className="text-xs text-red-400 hover:text-red-600 ml-auto">
+                        删除项目
+                      </button>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
@@ -193,42 +209,22 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
           </div>
         </div>
 
-        {/* 操作侧栏 */}
-        <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3">操作</h3>
-            <div className="space-y-2">
-              {/* 琴行操作 */}
-              {canPartnerEdit && <Btn variant="outline" className="w-full" onClick={() => setEditOpen(true)}>编辑活动</Btn>}
-              {!isCompany && p.status === "草稿" && (
-                <Btn className="w-full" onClick={launch}>发起活动</Btn>
-              )}
-              {!isCompany && p.status === "执行中" && (
-                <Btn className="w-full" onClick={() => setSettleOpen(true)}>提交结算资料</Btn>
-              )}
-
-              {/* 公司操作 */}
-              {isCompany && p.status === "待结算" && (
-                <Btn className="w-full" onClick={settle}>确认结算</Btn>
-              )}
-
-              {/* 无操作提示 */}
-              {((isCompany && p.status !== "待结算") ||
-                (!isCompany && !["草稿", "执行中"].includes(p.status))) && (
-                <p className="text-xs text-gray-400 text-center py-2">当前状态无可执行操作</p>
-              )}
-
-              {canPartnerEdit && (
-                <button
-                  onClick={() => { if (confirm("确认删除该项目？")) { projectStore.delete(p.id); ctx.refresh(); ctx.go("projects"); } }}
-                  className="w-full text-xs text-red-400 hover:text-red-600 py-2 mt-1">
-                  删除项目
-                </button>
-              )}
+        {/* 操作侧栏 - 仅公司 */}
+        {isCompany && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+              <h3 className="text-sm font-semibold text-gray-800 mb-3">操作</h3>
+              <div className="space-y-2">
+                {p.status === "待结算" && (
+                  <Btn className="w-full" onClick={settle}>确认结算</Btn>
+                )}
+                {p.status !== "待结算" && (
+                  <p className="text-xs text-gray-400 text-center py-2">当前状态无可执行操作</p>
+                )}
+              </div>
             </div>
           </div>
-
-        </div>
+        )}
       </div>
 
       {editOpen && (

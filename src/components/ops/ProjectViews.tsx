@@ -177,7 +177,6 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
                 {!isCompany && (
                   <div className="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-2 items-center">
                     {canPartnerEdit && <Btn variant="outline" onClick={() => setEditOpen(true)}>编辑活动</Btn>}
-                    {p.status === "草稿" && <Btn onClick={launch}>发起活动</Btn>}
                     {p.status === "执行中" && <Btn onClick={() => setSettleOpen(true)}>提交结算资料</Btn>}
                     {canPartnerEdit && (
                       <button
@@ -260,14 +259,17 @@ function ProjectFormModal({ ctx, project, onClose, onDone }: {
   function s(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
   function submit() {
-    if (!form.title || !form.partnerId || !form.venue || !form.douyinAccount) {
-      setErr("活动名称、琴行、具体地点、抖音账号为必填"); return;
+    if (!form.title || !form.partnerId || !form.venue) {
+      setErr("活动名称、琴行、具体地点为必填"); return;
     }
+    const allFilled = !!(form.title && form.partnerId && form.province && form.city && form.venue && form.eventDate && form.planStart && form.planEnd && form.douyinAccount);
+    const autoStatus = allFilled ? "执行中" : "草稿";
     if (project) {
-      projectStore.update(project.id, { ...form, eventDate: form.eventDate || null, planStart: form.planStart || null, planEnd: form.planEnd || null });
+      const keepStatus = ["待结算", "已结算", "已取消"].includes(project.status);
+      projectStore.update(project.id, { ...form, eventDate: form.eventDate || null, planStart: form.planStart || null, planEnd: form.planEnd || null, ...(keepStatus ? {} : { status: autoStatus }) });
       onDone(project.id);
     } else {
-      const rec = projectStore.create({ ...form });
+      const rec = projectStore.create({ ...form, status: autoStatus });
       onDone(rec.id);
     }
   }

@@ -294,10 +294,23 @@ function ProjectFormModal({ ctx, project, onClose, onDone }: {
         <Field label="具体地点" required hint="选在人流量大的热闹位置">
           <input className={inp} value={form.venue} onChange={e => s("venue", e.target.value)} placeholder="例：万达广场一楼中庭" />
         </Field>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           <Field label="活动日期"><input type="date" className={inp} value={form.eventDate} onChange={e => s("eventDate", e.target.value)} /></Field>
           <Field label="计划开始"><input type="time" className={inp} value={form.planStart} onChange={e => s("planStart", e.target.value)} /></Field>
           <Field label="计划结束"><input type="time" className={inp} value={form.planEnd} onChange={e => s("planEnd", e.target.value)} /></Field>
+          <Field label="时长">
+            <div className={`${inp} bg-gray-50 text-gray-500 cursor-default`}>
+              {(() => {
+                if (!form.planStart || !form.planEnd) return "自动计算";
+                const [sh, sm] = form.planStart.split(":").map(Number);
+                const [eh, em] = form.planEnd.split(":").map(Number);
+                const mins = (eh * 60 + em) - (sh * 60 + sm);
+                if (mins <= 0) return "时间有误";
+                const h = Math.floor(mins / 60), m = mins % 60;
+                return `${h > 0 ? h + "小时" : ""}${m > 0 ? m + "分钟" : ""}`;
+              })()}
+            </div>
+          </Field>
         </div>
         <Field label="抖音账号" required hint="公司将通过该账号监看直播">
           <input className={inp} value={form.douyinAccount} onChange={e => s("douyinAccount", e.target.value)} placeholder="抖音号 / 主页链接" />

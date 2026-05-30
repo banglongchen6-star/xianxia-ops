@@ -20,6 +20,8 @@ jobs:
             git pull origin main
             npm install
             npm run build
+            fuser -k 3001/tcp 2>/dev/null || true
+            sleep 2
             pm2 delete xianxia-ops 2>/dev/null || true
             pm2 start npm --name xianxia-ops -- start -- -p 3001
             pm2 save

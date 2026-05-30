@@ -110,7 +110,7 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
     reload();
   }
 
-  const canPartnerEdit = !isCompany && p.status === "草稿";
+  const canPartnerEdit = !isCompany && !["已结算", "已取消"].includes(p.status);
 
   // 哪些 tab 可见
   const active = ["执行中", "待结算", "已结算"].includes(p.status);
@@ -157,7 +157,7 @@ export function ProjectDetailView({ ctx }: { ctx: Ctx }) {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <Info icon={MapPin} label="地点" value={`${p.province}${p.city}${p.district} ${p.venue}`} />
                   <Info icon={Calendar} label="活动日期" value={p.eventDate || "待定"} />
-                  <Info icon={Clock} label="计划时段" value={p.planStart && p.planEnd ? `${p.planStart} – ${p.planEnd}` : "待定"} />
+                  <Info icon={Clock} label="计划时段" value={p.planStart && p.planEnd ? `${p.planStart} – ${p.planEnd}${(() => { const [sh, sm] = p.planStart.split(":").map(Number); const [eh, em] = p.planEnd.split(":").map(Number); const mins = (eh * 60 + em) - (sh * 60 + sm); if (mins <= 0) return ""; const h = Math.floor(mins / 60), m = mins % 60; return `（${h > 0 ? h + "小时" : ""}${m > 0 ? m + "分钟" : ""}）`; })()}` : "待定"} />
                   <Info icon={Video} label="抖音账号" value={p.douyinAccount} />
                 </div>
 

@@ -297,9 +297,9 @@ function ProjectFormModal({ ctx, project, onClose, onDone }: {
           <input className={inp} value={form.venue} onChange={e => s("venue", e.target.value)} placeholder="例：万达广场一楼中庭" />
         </Field>
         <div className="grid grid-cols-4 gap-3">
-          <Field label="活动日期"><input type="date" className={inp} value={form.eventDate} onChange={e => s("eventDate", e.target.value)} /></Field>
-          <Field label="计划开始"><input type="time" className={inp} value={form.planStart} onChange={e => s("planStart", e.target.value)} /></Field>
-          <Field label="计划结束"><input type="time" className={inp} value={form.planEnd} onChange={e => s("planEnd", e.target.value)} /></Field>
+          <Field label="活动日期" required><input type="date" className={inp} value={form.eventDate} onChange={e => s("eventDate", e.target.value)} /></Field>
+          <Field label="计划开始" required><input type="time" className={inp} value={form.planStart} onChange={e => s("planStart", e.target.value)} /></Field>
+          <Field label="计划结束" required><input type="time" className={inp} value={form.planEnd} onChange={e => s("planEnd", e.target.value)} /></Field>
           <Field label="时长">
             <div className={`${inp} bg-gray-50 text-gray-500 cursor-default`}>
               {(() => {
